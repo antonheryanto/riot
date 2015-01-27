@@ -52,7 +52,7 @@ Riot custom tags are the building blocks for user interfaces. They make the "vie
 </todo>
 ```
 
-See [live demo](/riotjs/dist/demo/) or download [demo.zip](/riotjs/dist/riot-{{ riot_version }}.zip)
+See [live demo](http://muut.github.io/riotjs/demo/), browse the [sources](https://github.com/muut/riotjs/tree/gh-pages/demo), or download the [zip](https://github.com/muut/riotjs/archive/gh-pages.zip).
 
 
 
@@ -389,7 +389,7 @@ The event handler receives the standard event object as the first argument. The 
 - `e.relatedTarget` points to the element where the event handler is specified.
 - `e.target` is the originating element. This is not necessarily the same as `relatedTarget`.
 - `e.which` is the key code in a keyboard event (`keypress`, `keyup`, etc...).
-- `e.data` is the current element in a loop. See [loops](#loops) for more details.
+- `e.item` is the current element in a loop. See [loops](#loops) for more details.
 
 
 ## Conditionals
@@ -464,7 +464,7 @@ The looped items are [tag instances](/riotjs/api/#tag-instance). Riot does not t
 
 ### Event handlers with looped items
 
-Event handlers can access individual items in a collection with `event.data`. Now let's implement the `remove` function:
+Event handlers can access individual items in a collection with `event.item`. Now let's implement the `remove` function:
 
 ```
 <todo>
@@ -584,10 +584,11 @@ var js = riot_compile(tag, { compact: true })
 
 The compile function takes a string and returns a string.
 
-### Task runners
+### Plug into your workflow
 
-- [Gulp plugin](https://github.com/e-jigsaw/gulp-riot)
-- [Grunt plugin](https://github.com/ariesjia/grunt-riot)
+- [Gulp](https://github.com/e-jigsaw/gulp-riot)
+- [Grunt](https://github.com/ariesjia/grunt-riot)
+- [Browserify](https://github.com/jhthorsen/riotify)
 
 ### Creating tags manually
 
