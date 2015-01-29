@@ -1,8 +1,8 @@
-/* Riot 2.0.2, @license MIT, (c) 2015 Muut Inc. + contributors */
+/* Riot 2.0.5, @license MIT, (c) 2015 Muut Inc. + contributors */
 
 ;(function() {
 
-var riot = { version: 'v2.0.2' }
+var riot = { version: 'v2.0.5' }
 
 'use strict'
 
@@ -49,6 +49,7 @@ riot.observable = function(el) {
         fn.busy = 1
         fn.apply(el, fn.typed ? [name].concat(args) : args)
         if (fn.one) { fns.splice(i, 1); i-- }
+        else if (fns[i] && fns[i] !== fn) { i-- } // Makes self-removal possible during iteration
         fn.busy = 0
       }
     }

@@ -8,7 +8,7 @@
 //
 //   var riot = require('riot/compiler')
 //   riot.make({ from: 'foo', to: 'bar', compact: true })
-//   riot.watch({ from: 'foo.js', to: 'bar.js' })
+//   riot.watch({ from: 'foo.tag', to: 'bar.js' })
 //
 
 function help() {
@@ -21,7 +21,8 @@ function help() {
     '  -h, --help      You\'re reading it',
     '  -w, --watch     Watch for changes',
     '  -c, --compact   Minify </p> <p> to </p><p>',
-    '  -t, --type      Script type: coffeescript, typescript, es6 ...',
+    '  -t, --type      JavaScript pre-processor. Build-in support for: es6, coffeescript, typescript, none',
+    '  --template      HTML pre-processor. Build-in suupport for: jade',
     '  --expr          Run expressions trough parser defined with --type',
     '',
     'Build a single .tag file:',
@@ -52,7 +53,7 @@ function help() {
 var ph = require('path'),
     sh = require('shelljs'),
     chokidar = require('chokidar'),
-    compile = require('./compile')
+    compiler = require('./compiler')
 
 
 function init(opt) {
@@ -113,7 +114,7 @@ var self = module.exports = {
 
     // Process files
 
-    function parse(from) { return compile(sh.cat(from), opt.compile_opts) }
+    function parse(from) { return compiler.compile(sh.cat(from), opt.compile_opts) }
     function toFile(from, to) { from.map(parse).join('\n').to(to[0]) }
     function toDir(from, to) { from.map(function(from, i) { parse(from).to(to[i]) }) }
     ;(opt.flow[1] == 'f' ? toFile : toDir)(from, to)
@@ -164,7 +165,7 @@ function cli() {
 
   var args = require('minimist')(process.argv.slice(2), {
     boolean: ['watch', 'compact', 'help'],
-    alias: { w: 'watch', c: 'compact', h: 'help' }
+    alias: { w: 'watch', c: 'compact', h: 'help', t: 'type' }
   })
 
   // Translate args into options hash
@@ -175,7 +176,8 @@ function cli() {
     compile_opts: {
       compact: args.compact,
       type: args.type,
-      expr: args.expr
+      expr: args.expr,
+      template: args.template
     },
     from: args._.shift(),
     to: args._.shift()
@@ -195,4 +197,3 @@ function cli() {
 
 
 if (!module.parent) cli()
-
