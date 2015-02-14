@@ -1,6 +1,5 @@
 
-
-(function(is_node) {
+;(function(is_node) {
 
   var BOOL_ATTR = ('allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,default,'+
     'defaultchecked,defaultmuted,defaultselected,defer,disabled,draggable,enabled,formnovalidate,hidden,'+
@@ -19,14 +18,16 @@
     none: plainjs,
     cs: coffee,
     es6: es6,
-    typescript: typescript
+    typescript: typescript,
+    livescript: livescript,
+    ls: livescript
   }
 
   // (tagname) (html) (javascript) endtag
-  var CUSTOM_TAG = /^<([\w\-]+)>([^\x00]*[\w\/]>$)?([^\x00]*?)^<\/\1>/gim,
+  var CUSTOM_TAG = /^<([\w\-]+)>([^\x00]*[\w\-\/]>$)?([^\x00]*?)^<\/\1>/gim,
       SCRIPT = /<script(\s+type=['"]?([^>'"]+)['"]?)?>([^\x00]*?)<\/script>/gm,
       HTML_COMMENT = /<!--.*?-->/g,
-      CLOSED_TAG = /<([\w\-]+)([^\/]*)\/\s*>/g,
+      CLOSED_TAG = /<([\w\-]+)([^>]*)\/\s*>/g,
       LINE_COMMENT = /^\s*\/\/.*$/gm,
       JS_COMMENT = /\/\*[^\x00]*?\*\//gm
 
@@ -40,7 +41,7 @@
     html = html.trim().replace(HTML_COMMENT, '')
 
     // foo={ bar } --> foo="{ bar }"
-    html = html.replace(/=(\{[^\}]+\})([\s\>])/g, '="$1"$2')
+    html = html.replace(/=(\{[^\}]+\})([\s\/\>])/g, '="$1"$2')
 
     // IE8 looses boolean attr values: `checked={ expr }` --> `__checked={ expr }`
     html = html.replace(/([\w\-]+)=["'](\{[^\}]+\})["']/g, function(full, name, expr) {
@@ -51,7 +52,7 @@
     // run trough parser
     if (opts.expr) {
       html = html.replace(/\{\s*([^\}]+)\s*\}/g, function(_, expr) {
-         return '{' + compileJS(expr, opts, type).trim() + '}'
+         return '{' + compileJS(expr, opts, type).trim().replace(/\r?\n|\r/g, '') + '}'
       })
     }
 
@@ -83,15 +84,15 @@
   }
 
   function es6(js) {
-    return require('6to5').transform(js).code
-  }
-
-  function plainjs(js) {
-    return js
+    return require('6to5').transform(js, { blacklist: ['useStrict'] }).code
   }
 
   function typescript(js) {
     return require('typescript-simple')(js)
+  }
+
+  function livescript(js) {
+    return require('LiveScript').compile(js, { bare: true, header: false })
   }
 
   function plainjs(js) {
@@ -127,7 +128,7 @@
 
       // method end
       if (line.slice(0, es6_ident.length + 1) == es6_ident + '}') {
-        lines[i] += '.bind(this);'
+        lines[i] = es6_ident + es6_ident + 'this.update()\n' + es6_ident + '}.bind(this);'
         es6_ident = ''
       }
 
@@ -226,7 +227,6 @@
       var url = script.getAttribute('src')
 
       function compileTag(source) {
-        script.parentNode.removeChild(script)
         globalEval(source)
 
         if (i + 1 == scripts.length) {
@@ -241,13 +241,26 @@
 
   }
 
-  function browserCompile(arg, skip_eval) {
 
-    // string -> compile a new tag
+  riot.compile = function(arg, fn) {
+
+    // string
     if (typeof arg == 'string') {
-      var js = unindent(compile(arg))
-      if (!skip_eval) globalEval(js)
-      return js
+
+      // compile & return
+      if (arg.trim()[0] == '<') {
+        var js = unindent(compile(arg))
+        if (!fn) globalEval(js)
+        return js
+
+      // URL
+      } else {
+        return GET(arg, function(str) {
+          var js = unindent(compile(str))
+          globalEval(js)
+          fn && fn(js, str)
+        })
+      }
     }
 
     // must be a function
@@ -273,15 +286,15 @@
       mountTo = riot.mountTo
 
   riot.mount = function(a, b) {
-    browserCompile(function() { mount(a, b) })
+    var ret
+    riot.compile(function() { ret = mount(a, b) })
+    return ret
   }
 
   riot.mountTo = function(a, b, c) {
-    browserCompile(function() { mountTo(a, b, c) })
-  }
-
-  riot._compile = function(str) {
-    return browserCompile(str, true)
+    var ret
+    riot.compile(function() { ret = mountTo(a, b, c) })
+    return ret
   }
 
 })(!this.top)

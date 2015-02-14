@@ -6,6 +6,8 @@ minify: false
 
 base: https://raw.githubusercontent.com/muut/riotjs/master
 cdnjs: https://cdnjs.cloudflare.com/ajax/libs/riot
+version: 2.0
+
 ====
 
 ##### [<span class="tag">v{{ riot_version }}</span> release notes](release-notes.html) | .tall
@@ -13,28 +15,44 @@ cdnjs: https://cdnjs.cloudflare.com/ajax/libs/riot
 
 ### Direct download
 
-[riot+compiler.min.js]({{ base }}/riot+compiler.min.js)
-
-[riot+compiler.js]({{ base }}/riot+compiler.js)
-
 [riot.min.js]({{ base }}/riot.min.js)
 
 [riot.js]({{ base }}/riot.js)
 
+[compiler.min.js]({{ base }}/compiler.min.js)
+
+[compiler.js]({{ base }}/compiler.js)
+
+[riot+compiler.min.js]({{ base }}/riot+compiler.min.js)
+
+[riot+compiler.js]({{ base }}/riot+compiler.js)
+
 
 ### Content delivery networks
 
+
+#### [jsdelivr](http://www.jsdelivr.com/#!riot)
+
+`https://cdn.jsdelivr.net/g/riot@2.0(riot.min.js+compiler.min.js)` <small>(latest 2.0.X)</small>
+
+`https://cdn.jsdelivr.net/riot/2.0/riot.min.js` <small>(latest 2.0.X)</small>
+
+`https://cdn.jsdelivr.net/g/riot@{{ riot_version }}(riot.min.js+compiler.min.js)`
+
+`https://cdn.jsdelivr.net/riot/{{ riot_version }}/riot.min.js`
+
+
 #### [cdnjs](https://cdnjs.com/libraries/riot)
+
+<small>
+  <span class="tag red">note</span> v{{ riot_version }} was released on *{{ datetime }}*
+  and CDNJS takes around 30 hours to update.
+</small>
 
 `{{ cdnjs }}/{{ riot_version }}/riot+compiler.min.js`
 
 `{{ cdnjs }}/{{ riot_version }}/riot.min.js`
 
-#### [jsdelivr](http://www.jsdelivr.com/#!riot)
-
-`https://cdn.jsdelivr.net/riot/{{ riot_version }}/riot+compiler.min.js`
-
-`https://cdn.jsdelivr.net/riot/{{ riot_version }}/riot.min.js`
 
 
 ### Package managers
@@ -86,8 +104,7 @@ That's a space separated list of tag names.
 
 ## Known issues
 
-- On current version conditionals are implemented with `style="display: none"`. This will be fixed on upcoming version where `if` attribute will add/remove the element from the DOM completely.
-
+- `each` attribute does not detect if the looped items are sorted or otherwise re-ordered
 - Looping table rows or cells with `each` attribute is not working on IE8 and IE9.
 
 

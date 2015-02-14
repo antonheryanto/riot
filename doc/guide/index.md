@@ -28,26 +28,28 @@ Riot custom tags are the building blocks for user interfaces. They make the "vie
     <button disabled={ !text }>Add #{ items.length + 1 }</button>
   </form>
 
-  this.disabled = true
+  &lt;script>
+    this.disabled = true
 
-  this.items = opts.items
+    this.items = opts.items
 
-  edit(e) {
-    this.text = e.target.value
-  }
-
-  add(e) {
-    if (this.text) {
-      this.items.push({ title: this.text })
-      this.text = this.input.value = ''
+    edit(e) {
+      this.text = e.target.value
     }
-  }
 
-  toggle(e) {
-    var item = e.item
-    item.done = !item.done
-    return true
-  }
+    add(e) {
+      if (this.text) {
+        this.items.push({ title: this.text })
+        this.text = this.input.value = ''
+      }
+    }
+
+    toggle(e) {
+      var item = e.item
+      item.done = !item.done
+      return true
+    }
+  </script>
 
 </todo>
 ```
@@ -60,18 +62,19 @@ See [live demo](http://muut.github.io/riotjs/demo/), browse the [sources](https:
 
 ### Tag syntax
 
-In a Riot custom tag the HTML layout is defined first, JavaScript second. The JavaScript starts where the last HTML tag ends. HTML is coupled with expressions that are 100% JavaScript.
+Riot tag is a combination of layout (HTML) and logic (JavaScript). Here are the basic rules:
 
-Characteristics:
-
+* HTML is defined first and the logic is enclosed inside optional `<script>` tag.
+* Without `<script>` tag the JavaScript starts where the last HTML tag ends.
 * Tags can be empty, HTML only or JavaScript only and `{ expressions }` are optional.
 * Quotes are optional: `<foo bar={ baz }>` becomes `<foo bar="{ baz }">`.
 * ES6 method syntax is supported: `methodName()` becomes `this.methodName = function()` and `this` variable always points to the current tag instance.
 * A shorthand syntax for class names is available: `class={ completed: done }`.
 * Boolean attributes (checked, selected etc..) are ignored when the expression value is falsy: `<input checked={ undefined }>` becomes `<input>`.
-* Self-closing tags are supported: `<div/>` equals `<div></div>`. Well known "open tags" such as `<br>`, `<hr>`, `<img>` or `<input>` need not to be closed.
+* Self-closing tags are supported: `<div/>` equals `<div></div>`. Well known "open tags" such as `<br>`, `<hr>`, `<img>` or `<input>` are never closed after the compilation.
 * Nested `<style>` tags are supported, but nested expressions are not evaluated
 * Standard HTML tags (`label`, `table`, `a` etc..) can also be customized, but not necessarily a wise thing to do.
+* Custom tags always needs to be closed (normally or self-closed).
 
 Tag definition always starts on the beginning of the line:
 
@@ -87,9 +90,9 @@ Tag definition always starts on the beginning of the line:
   </my-tag>
 ```
 
-### Script tag
+### No script tag
 
-You can explicitly nest the logic inside a `script` tag:
+You can leave out the `<script>` tag:
 
 ```
 <todo>
@@ -97,14 +100,13 @@ You can explicitly nest the logic inside a `script` tag:
   <!-- layout -->
   <h3>{ opts.title }</h3>
 
-  &lt;script>
-    // logic comes here
-  </script>
+  // logic comes here
+  this.items = [1, 2, 3]
 
 </todo>
 ```
 
-This allows you to take advantage of your editor's possible syntax highlight feature and you can more clearly see where the logic starts and layout ends.
+In which case the logic starts after the last HTML tag. This "open syntax" is more commonly used on the examples on this website.
 
 
 ### Pre-processor
@@ -137,7 +139,7 @@ Once a tag is created you can mount it on the page as follows:
   &lt;script src="riot.min.js"></script>
 
   <!-- include the tag -->
-  &lt;script src="todo.js"></script>
+  &lt;script src="todo.js" type="riot/tag"></script>
 
   <!-- mount the tag -->
   &lt;script>riot.mount('todo')</script>
@@ -198,8 +200,9 @@ Tag is created in following sequence:
 After the tag is mounted the expressions are updated as follows:
 
 1. Automatically after an event handler is called. For example the `toggle` method in the above example.
-2. When `this.update()` is called inside the tag instance.
-3. When `riot.update()` is called, which globally updates all expressions on the page.
+2. When `this.update()` is called on the current tag instance
+3. When `this.update()` is called on a parent tag, or any parent upwards. Updates flow uni-directionally from parent to child.
+4. When `riot.update()` is called, which globally updates all expressions on the page.
 
 The "update" event is fired every time the tag is updated.
 
@@ -307,13 +310,58 @@ Riot has a special syntax for CSS class names. For example:
 
 evaluates to "foo baz zorro". Property names whose value is truthful are appended to the list of class names. Of course you can use this notation in other places than class names if you find a suitable use case.
 
-### Miscellaneous
+
+### Printing brackets
 
 You can output an expression without evaluation by escaping the opening bracket:
 
 `\\{ this is not evaluated \\}` outputs `{ this is not evaluated }`
 
+
+### Customizing brackets
+
+You are free to customize the brackets to your liking. For example:
+
+``` js
+riot.settings.brackets = '${ }'
+riot.settings.brackets = '\{\{ }}'
+```
+
+the start and end is separated with a space character.
+
+
+
+### Etc
+
 Expressions inside `<style>` tags are ignored.
+
+
+### Render unescaped HTML
+
+Riot expressions can only render text values without HTML formatting. However you can make a custom tag to do the job. For example:
+
+```
+<raw>
+  <span></span>
+
+  this.root.innerHTML = opts.content
+</raw>
+```
+
+After the tag is defined you can use it inside other tags. For example
+
+```
+<my-tag>
+  <p>Here is some raw content: <raw content="{ html }"/> </p>
+
+  this.html = 'Hello, <strong>world!</raw>'
+</my-tag>
+```
+
+[demo on jsfiddle](http://jsfiddle.net/23g73yvx/)
+
+<span class="tag red">warning</span> this could expose the user to XSS attacks so make sure you never load data from an untrusted source.
+
 
 
 ## Nested tags
@@ -421,8 +469,8 @@ submit() {
 
 The event handler receives the standard event object as the first argument. The following properties are normalized to work across browsers:
 
-- `e.relatedTarget` points to the element where the event handler is specified.
-- `e.target` is the originating element. This is not necessarily the same as `relatedTarget`.
+- `e.currentTarget` points to the element where the event handler is specified.
+- `e.target` is the originating element. This is not necessarily the same as `currentTarget`.
 - `e.which` is the key code in a keyboard event (`keypress`, `keyup`, etc...).
 - `e.item` is the current element in a loop. See [loops](#loops) for more details.
 
@@ -441,12 +489,9 @@ Again, the expression can be just a simple property or a full JavaScript express
 
 - `show` – show the element using `style="display: ''"` when the value is true
 - `hide` – hide the element using `style="display: none"` when the value is true
-- `if` – add (true value) or remove (false value) the element from the document*
+- `if` – add (true value) or remove (false value) the element from the document
 
 The equality operator is `==` and not `===`. For example: `'a string' == true`.
-
-<small>Currently `if` is implemented with CSS display property as well.</small>
-
 
 
 ## Loops
@@ -567,18 +612,6 @@ Plain objects can also be looped. For example:
     key2: 1110.8900,
     key3: Math.random()
   }
-</my-tag>
-```
-
-### Render unescaped HTML
-
-Easily manipulate the DOM. Never load data from an untrusted source, this could expose the user to XSS attacks.
-
-```
-<my-tag>  
-  <div id='content'></div>
-
-  this.content.innerHTML = '<b>My raw html</b>'
 </my-tag>
 ```
 

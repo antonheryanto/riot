@@ -3,7 +3,7 @@
 
 require('shelljs/global')
 
-var compiler = require('../../compiler/compiler')
+var compiler = require('../../lib/compiler')
 
 function assert(test, should) {
   if (test === should) console.info('OK', test.replace(/\n/g, '').trim())
@@ -31,6 +31,10 @@ function testHTML() {
   test('<a a={ a } b={ b }>', '<a a="{ a }" b="{ b }">')
   test('<a href="a?b={ c }">', '<a href="a?b={ c }">')
   test('<a id="{ a }b">', '<a id="{ a }b">')
+  test('<input id={ a }/>', '<input id="{ a }">')
+  test('<a id={ a }/>', '<a id="{ a }"></a>')
+  test('<a><b/></a>', '<a><b></b></a>')
+
   test('<a loop={ a } defer="{ b }" visible>', '<a __loop="{ a }" __defer="{ b }" visible>')
 
   test('{ a }<!-- c -->', '{ a }')
@@ -59,10 +63,12 @@ function testFiles(opts) {
     assert(compiler.compile(src, opts).trim(), should)
   }
 
+
   test('complex', {})
   test('test', { type: 'cs' })
   test('test', { type: 'es6' })
   test('test.jade', { template: 'jade' })
+  test('slide.jade', { template: 'jade' })
 
 }
 

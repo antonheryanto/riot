@@ -1,7 +1,12 @@
 
 style: /riotjs/css/riot
 script: /riotjs/site
+content_class: normal
 noheader: true
+
+riot_version: 2.0.9
+datetime: Feb 13
+
 
 ==== layout
 
@@ -25,12 +30,12 @@ noheader: true
 {% if hero %}
 <div id="hero">
   <div class="riot-tag">{</div>
-  <a class="small" href="download.html">Version {{ riot_version }}</a>
   <h1>A React- like, 2.5KB user interface library</h1>
-  <h2>Custom tags • Minimal syntax • Less DOM reflows • Full stack • IE8</h2>
+  <h2>Custom tags • Concise syntax • Virtual DOM • Full stack • IE8</h2>
 
-  <p class="normal">
-    <a href="/blog/technology/riot-2.0/">Read the blog entry...</a>
+  <p class="tease normal">
+    <a href="download.html" class="tag blue">v{{ riot_version }}</a>
+    — <a href="release-notes.html">LiveScript support, multiple class shortcut and more</a>
   </p>
 
 </div>
@@ -80,7 +85,9 @@ noheader: true
     <h3>API</h3>
 
     <div>
-      <p><a href="/riotjs/api/">Custom tags</a></p>
+      <p><a href="/riotjs/api/#general">General</a></p>
+      <p><a href="/riotjs/api/#custom-tags">Custom tags</a></p>
+      <p><a href="/riotjs/api/#compiler">Compiler</a></p>
       <p><a href="/riotjs/api/#observable">Observable</a></p>
       <p><a href="/riotjs/api/#router">Router</a></p>
     </div>
@@ -89,7 +96,7 @@ noheader: true
 
   </nav><!--
 
---><div id="content" class="normal">
+--><div id="content" class="{{ content_class }}">
 
     <div class="hgroup">
       <h1>{{ data.subtitle || data.title }}</h1>

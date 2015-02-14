@@ -26,7 +26,8 @@ Custom tags need to be transformed to JavaScript before the browser can execute 
 <script src="path/to/javascript/with-tags.js" type="riot/tag"></script>
 
 <!-- include riot.js and the compiler -->
-<script src="//cdn.jsdelivr.net/riot/2.0/riot+compiler.min.js"></script>
+<script src="//cdn.jsdelivr.net/g/riot@2.0(riot.min.js+compiler.min.js)"></script>
+
 
 <!-- mount normally -->
 &lt;script>
@@ -43,6 +44,8 @@ Compilation phase is basically free and takes no time at all. Compiling a [timer
 The compiler weights only 3.2KB (1.7K gzipped) so you can safely perform client side compilation on production without download or performance or issues.
 
 Just like Riot itself the compiler works on IE8 as well.
+
+Read the [compiler API](/riotjs/api/#compiler) for more details.
 
 
 ### Demos
@@ -127,13 +130,21 @@ riot -w src dist
 ```
 
 
+### Custom extension
+
+You're free to use any file extension for your tags (instead of default `.tag`):
+
+``` sh
+riot --ext html
+```
+
+
 ### Node module
 
 ```
-var compiler = require('riot/compiler/compiler')
-// NOTE: the above path will be shortened to "riot/compiler"
+var riot = require('riot')
 
-var js = compiler.compile(source_string)
+var js = riot.compile(source_string)
 ```
 
 The compile function takes a string and returns a string.
@@ -238,6 +249,38 @@ An sample tag written in TypeScript:
 ``` sh
 npm install typescript-simple
 ```
+### LiveScript
+
+Check out [LiveScript](http://livescript.net) for language features and documentation.
+
+The source language is specified with `--type` or `-t` argument:
+
+``` sh
+# use livescript pre-processor
+riot --type livescript --expr source.tag
+```
+
+The `--expr` argument specifies that all the expressions are also processed as well. You can also use "ls" as an alias to "livescript". Here is a sample tag written in LiveScript:
+
+```
+<kids>
+
+<h3 each={ kids[1 .. 2] }>{ name }</h3>
+
+# Here are the kids
+this.kids =
+* name: \Max
+* name: \Ida
+* name: \Joe
+
+</kids>
+```
+
+Note that `each` attribute is LiveScript as well. LiveScript must be present on your machine:
+
+``` sh
+npm install LiveScript -g
+```
 
 ### Jade
 
@@ -279,9 +322,9 @@ function myParser(js, options) {
 This parser is then passed for the compiler with `parser` option:
 
 ``` js
-var compiler = require('riot/compiler/compiler')
+var riot = require('riot')
 
-var js = compiler.compile(source_string, { parser: myParser, expr: true })
+var js = riot.compile(source_string, { parser: myParser, expr: true })
 ```
 
 Set `expr: true` if you want the expressions to be parsed as well.
@@ -297,5 +340,3 @@ riot --type none --expr source.tag
 ```
 
 If you make something great, please [share it](https://github.com/muut/riotjs/issues/58) !
-
-

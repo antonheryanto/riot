@@ -1,9 +1,20 @@
 <kids>
-  <h3 foo={ test }></h3>
-  <input />
-  <div />
-</kids>
 
-<kooma>
-  var foo = 'bar'
-</kooma>
+  <module-input>
+    <input type="{ opts.type }">
+    <input type='text' />
+    <button>submit</button>
+  </module-input>
+
+  <!--
+
+  <label each={ id, label in opts.values }>
+    <input type="radio">
+    { label }
+  </label>
+
+    is this working??
+
+  -->
+
+</kids>
