@@ -3,13 +3,10 @@
   <input name="rad" type="radio" value="2">
   <input name="rad" type="radio" value="3">
   <input name="t" id="t" value="1">
-  <multi-nchild n='child'></multi-nchild>
-</multi-named>
+  <input name={n} value='child'>
+  <input type='checkbox' each={v in checks} name="check" value="{v}">
 
-<multi-nchild>
-  <input name={opts.n} value='child'>
-  <input type='checkbox' each={v in checks} name="checks" value="{v}">
-
+  this.n = 'child'
   this.checks = ['one', 'two', 'three']
-</multi-nchild>
+</multi-named>
 
