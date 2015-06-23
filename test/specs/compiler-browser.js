@@ -136,6 +136,9 @@ describe('Compiler Browser', function() {
           '<ul>',
           '  <li each="{ item, i in items }" onclick="{ parent.opts.onItemClick }">{ i } { item.value } <\/li>',
           '<\/ul>',
+          '<dl>',
+          '  <dt each="{ models }" onclick="{ parent.opts.removeItemClick }"> { value } <\/dt>',
+          '<\/dl>',
           '<button onclick={ addSomeItems }>btn<\/button>',
 
           'this.items = []',
@@ -534,9 +537,13 @@ describe('Compiler Browser', function() {
   it('the each loops update correctly the DOM nodes', function() {
     var onItemClick = function(e) {
           var elIndex = Array.prototype.slice.call(children).indexOf(e.currentTarget)
-          expect(tag.items[elIndex]).to.be.equal(e.item)
+            item = e.item.item || e.item
+          expect(tag.items[elIndex]).to.be.equal(item)
         },
-        tag = riot.mount('loop', { onItemClick: onItemClick })[0],
+        removeItemClick = function(e) {
+          tag.models.splice(e.index, 1)
+        },
+        tag = riot.mount('loop', { onItemClick: onItemClick, removeItemClick: removeItemClick })[0],
         root = tag.root,
         button = root.getElementsByTagName('button')[0],
         children,
@@ -545,10 +552,14 @@ describe('Compiler Browser', function() {
     tags.push(tag)
 
     tag.items = []
+    tag.models = []
 
     while (itemsCount--) {
       tag.items.push({
         value: 'item #' + tag.items.length
+      })
+      tag.models.push({
+        value: 'remove #' + tag.models.length
       })
     }
     tag.update()
@@ -558,6 +569,15 @@ describe('Compiler Browser', function() {
       child.onclick({})
     })
     expect(children.length).to.be(5)
+
+    // remove item from models and make sure item is correct
+    for (var i = 0; i < 5; i++) {
+      var curItem = tag.models[0],
+        e = {},
+        ex = root.getElementsByTagName('dt')[0]
+      ex.onclick(e)
+      expect(curItem).to.be(e.item)
+    }
 
     // no update is required here
     button.onclick({})
