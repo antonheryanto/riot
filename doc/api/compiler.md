@@ -25,7 +25,7 @@ You can leave out the `riot.compile` call and write just:
 var tags = riot.mount('*')
 ```
 
-but you don't get to know when external recourses are loaded and compiled and the return value is an empty array if you have external scripts. If all scripts are defined on the page then riot.compile step can be left out.
+but you don't get to know when external resources are loaded and compiled and the return value is an empty array if you have external scripts. If all scripts are defined on the page then riot.compile step can be left out.
 
 For more details, read the compiler [general introduction](/riotjs/compiler.html).
 
@@ -34,7 +34,7 @@ For more details, read the compiler [general introduction](/riotjs/compiler.html
 Loads the given URL and compiles all tags after which the `callback` is called. For example:
 
 ``` javascript
-riot.compile('my/tags.js', function() {
+riot.compile('my/tags.tag', function() {
   // the loaded tags are ready to be used
 })
 ```
@@ -50,7 +50,7 @@ Compiles and executes the given `tag`. For example:
   </my-tag>
 </template>
 
-&lt;script>
+<script>
 riot.compile(my_tag.innerHTML)
 </script>
 ```
@@ -80,3 +80,69 @@ var js = riot.compile(tag)
 ```
 
 The compile function takes the tag definition (string) and returns JavaScript (string).
+
+### riot.parsers.css [tagName, css]
+
+Custom parsers that could be used to compile your tags css. For example:
+
+```js
+riot.parsers.css.myparser = function(tag, css) {
+  return css.replace(/@tag/, tag)
+}
+```
+
+```html
+<custom-parsers>
+  <p>hi</p>
+  <style type="text/myparser">
+    @tag {color: red;}
+  </style>
+</custom-parsers>
+```
+
+will be compiled to:
+
+```html
+<custom-parsers>
+  <p>hi</p>
+  <style type="text/myparser">
+    custom-parsers {color: red;}
+  </style>
+</custom-parsers>
+```
+
+### riot.parsers.js [js, options]
+
+Custom parsers that could be used to compile your tags javascript. For example
+
+```js
+riot.parsers.js.myparser = function(js) {
+  return js.replace(/@version/, '1.0.0')
+}
+```
+
+```html
+<custom-parsers>
+  <p>hi</p>
+  <script type="text/myparser">
+    this.version = "@version"
+  </script>
+</custom-parsers>
+```
+
+will be compiled to:
+
+```html
+<custom-parsers>
+  <p>hi</p>
+  <script type="text/myparser">
+    this.version = "1.0.0"
+  </script>
+</custom-parsers>
+```
+
+### riot.parsers.html [html]
+
+Custom parsers that could be used to compile your tags html
+
+

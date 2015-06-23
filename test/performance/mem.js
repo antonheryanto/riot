@@ -4,29 +4,48 @@
  *
  */
 
-var jsdom = require('jsdom')
-  riot = require('../../dist/riot/riot')
-  myComponent = 'my-component'
+var riot = require('../../dist/riot/riot'),
+  jsdom = require('jsdom').jsdom,
+  myComponent = 'my-component',
   myComponentHTML = [
     '<h1>{ opts.title }</h1>',
     '<p>{ opts.description }</p>',
-    '<my-list-item each="{ opts.items }">'
-  ].join('')
-  myListItem = 'my-list-item'
+      '<my-list-item each="{ opts.items }">'
+  ].join(''),
+  myListItem = 'my-list-item',
   myListItemHTML = [
     '<input type="checkbox" onchange="{ onChange }">',
-    '<span if="{ opts.isActive }">I am active</span>',
+    '<span if="{ opts.isActive }">I am active</span>'
   ].join('')
+
+
+/**
+ * Helper function to generate custom array
+ * @param  { int } amount amount of entries in the array
+ * @param  { * } data
+ * @return array
+ */
+
+
+function generateItems (amount) {
+  var items = []
+  while (--amount) {
+    items.push({
+      isActive: false
+    })
+  }
+  return items
+}
 
 /**
  * Check the memory usage analizing the heap
- * @param  { function } fun
+ * @param  { function } fn
  * @return { array } memory used + duration
  */
 
-function measure(fun) {
+function measure(fn) {
   var startTime = Date.now()
-  fun()
+  fn()
   return [process.memoryUsage().heapUsed, Date.now() - startTime]
 }
 
@@ -36,19 +55,19 @@ function measure(fun) {
  *
  */
 
-function setTags() {
-  riot.tag(myComponent, myComponentHTML,function (opts) {
+function setupTags() {
+  riot.tag(myComponent, myComponentHTML, function(opts) {
     var self = this
     function loop () {
-      opts.items = generateItems(1000,{
-          isActive:false
+      opts.items = generateItems(1000, {
+        isActive: false
       })
       result = measure(self.update.bind(self))
       console.log(
         (result[0] / 1024 / 1024).toFixed(2) + ' MiB',
         result[1] + ' ms'
       )
-      setTimeout(loop,1000)
+      setTimeout(loop, 1000)
     }
     loop()
   })
@@ -69,48 +88,18 @@ function mount() {
   riot.mount(myComponent, {
     title: 'hello world',
     description: 'mad world',
-    items: generateItems(1000,{
+    items: generateItems(1000, {
       isActive: false
     })
   })
 }
 
-/**
- * Helper function to generate custom array
- * @param  { int } amount amount of entries in the array
- * @param  { * } data
- * @return array
- */
 
-function generateItems(amount, data) {
-  var items = []
-  while (--amount) {
-    items.push(data)
-  }
-  return items
-}
-
-/**
- *
- * Start the tests
- *
- */
-
-function test () {
-  global.gc()
-  mount()
-}
-
-/**
- * Pepare the DOM and mount the riot components
- */
-
-jsdom.env({
-  html: '<!doctype html><html><head></head><body><' + myComponent + ' /></body></html>',
-  done: function (errors, window) {
-    global.document = window.document
-    setTags()
-    test()
-  }
-})
+// Initialize the test
+var doc = jsdom('<' + myComponent + '/>')
+global.window = doc.defaultView
+global.document = window.document
+global.gc()
+setupTags()
+mount()
 

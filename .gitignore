@@ -55,7 +55,8 @@ bower_components
 coverage
 dist
 make.js
-test/server
+# these files are generated anyway
+/test/compiler/js/*
 
 !.gitmodules
 !.travis.yml

@@ -17,7 +17,7 @@ Because it's widely used. According to [Net Market Share](http://www.netmarketsh
 Net Market Share stats count every user equally, while StatCounter gives extra weight to heavy web users.
 
 ### Is Riot free?
-Riot is free, open source and licensed under the MIT License.
+Riot is free, open source and licensed under the MIT License. Free from [Additional Grant of Patent Rights](https://github.com/facebook/react/blob/master/PATENTS).
 
 
 ### Can I use Riot in production?
@@ -39,7 +39,7 @@ The equality operator is good when you know how it works. We do this for example
 This causes `0` and `false` to be printed but `null` and `undefined` are printed as an empty string. Exactly what we want!
 
 
-### Can I use `<style>` tags in a .tag file?
+### Can I use `style` tags in a .tag file?
 Yes. You can use CSS normally inside a tag. The web component standard also has a mechanism of encapsulating of CSS. However, it's unlikely that this improves the overall manageability of your CSS.
 
 
@@ -48,13 +48,14 @@ Riot reduces the need for jQuery. You no longer need selectors, traversing, even
 
 
 ### Isn't `onclick` evil?
-It's not evil, it only looks bad. To have JS and HTML under the same module is more important than aesthetics. The minimal Riot syntax makes event handlers look decent.
+It's not evil, it just looks "old". To have JS and HTML under the same module is more important than aesthetics. The minimal Riot syntax makes event handlers look decent.
 
 ### Any future plans?
 
 Yes:
 
-1. Browser based compilation
-2. Server side HTML generation and "isomorphic" applications
-3. Bigger test suite with server side tests
-4. Tag option validation using HTML attributes
+1. Performance improvements ( especially looping )
+2. Plugin system
+3. Tag option validation using HTML attributes
+
+

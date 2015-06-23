@@ -3,11 +3,13 @@
 
 require('shelljs/global')
 
-var compiler = require('../../lib/compiler')
+// global.riot = {settings: { brackets: '{ }' } }
 
-function assert(test, should) {
-  if (test === should) console.info('OK', test.replace(/\n/g, '').trim())
-  else throw new Error(test + ' != ' + should)
+var compiler = require('../../lib/node/compiler')
+
+function assert(str, resStr) {
+  if (str === resStr) console.info('OK', str.replace(/\n/g, '').trim())
+  else throw new Error(str + ' != ' + resStr)
 }
 
 // custom javscript parser
@@ -17,12 +19,12 @@ function parser(str) {
 
 function testHTML() {
 
-  function test(test, should) {
-    assert(compiler.html(test, {}), should)
+  function test(str, resStr) {
+    assert(compiler.html(str, {}), resStr)
   }
 
-  function testParser(test, should) {
-    assert(compiler.html(test, { parser: parser, expr: true }), should)
+  function testParser(str, resStr) {
+    assert(compiler.html(str, { parser: parser, expr: true }), resStr)
   }
 
   test('<p/>', '<p></p>')
@@ -35,14 +37,13 @@ function testHTML() {
   test('<a id={ a }/>', '<a id="{ a }"></a>')
   test('<a><b/></a>', '<a><b></b></a>')
 
-  test('<a loop={ a } defer="{ b }" visible>', '<a __loop="{ a }" __defer="{ b }" visible>')
-
   test('{ a }<!-- c -->', '{ a }')
   test('<!-- c -->{ a }', '{ a }')
   test('<!-- c -->{ a }<!-- c --><p/><!-- c -->', '{ a }<p></p>')
+  test('<a loop={ a } defer="{ b }" visible>', '<a __loop="{ a }" __defer="{ b }" visible>')
 
-  test("{ 'a' }", "{ \\'a\\' }")
-  test("\\{ a \\}", "\\\\{ a \\\\}")
+  test('{ "a" }', '{ \"a\" }')
+  test('\\{ a \\}', '\\\\{ a \\\\}')
 
   testParser('<a href={ a }>', '<a href="{@a}">')
   testParser('<a>{ b }</a>', '<a>{@b}</a>')
@@ -65,10 +66,12 @@ function testFiles(opts) {
 
 
   test('complex', {})
-  test('test', { type: 'cs' })
+  test('test', { type: 'cs', expr: true })
   test('test', { type: 'es6' })
   test('test.jade', { template: 'jade' })
   test('slide.jade', { template: 'jade' })
+  test('style', {})
+  test('brackets', { brackets: '${ }' })
 
 }
 

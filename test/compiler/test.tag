@@ -1,20 +1,19 @@
-<kids>
+<treeitem>
 
-  <module-input>
-    <input type="{ opts.type }">
-    <input type='text' />
-    <button>submit</button>
-  </module-input>
+  <div class={ bold: isFolder() } onclick={ toggle } ondblclick={ changeType }>
+    { name }
+    <span if={ isFolder() }>[{open ? '-' : '+'}]</span>
+  </div>
 
-  <!--
+  <ul if={ isFolder() } show={ isFolder() && open }>
+    <li _each={ child, i in nodes }>
+      <treeitem data={child}></treeitem>
+    </li>
+    <li onclick={ addChild }>+</li>
+  </ul>
 
-  <label each={ id, label in opts.values }>
-    <input type="radio">
-    { label }
-  </label>
+  <script>
+  var self = this
+  </script>
 
-    is this working??
-
-  -->
-
-</kids>
+</treeitem>

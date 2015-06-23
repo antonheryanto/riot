@@ -1,11 +1,14 @@
 {
   "name": "riot",
-  "version": "2.0.9",
-  "description": "A React- like, 2.5K user interface library",
+  "version": "2.1.0",
+  "description": "A React- like, 3.5K user interface library",
   "homepage": "https://muut.com/riotjs/",
   "repository": "muut/riotjs",
   "author": "Muut, Inc. and other contributors",
   "license": "MIT",
+  "scripts": {
+    "test": "make riot"
+  },
   "keywords": [
     "custom tags",
     "custom elements",
@@ -32,13 +35,27 @@
     "riot.js"
   ],
   "dependencies": {
-    "chokidar": "~1.0.0-rc2",
-    "minimist": "~1.1.0",
-    "shelljs": "~0.3.0"
+    "chalk": "^1.0.0",
+    "chokidar": "~1.0.1",
+    "minimist": "~1.1.1",
+    "shelljs": "~0.4.0",
+    "simple-dom": "^0.2.2",
+    "simple-html-tokenizer": "^0.1.1"
   },
   "devDependencies": {
-    "jsdom": "^3.1.1",
-    "jshint": "latest",
+    "cheerio": "^0.19.0",
+    "coveralls": "^2.11.2",
+    "eslint": "^0.20.0",
+    "expect.js": "^0.3.1",
+    "glob": "^5.0.5",
+    "jsdom": "^5.3.0",
+    "karma": "^0.12.31",
+    "karma-coverage": "^0.3.1",
+    "karma-mocha": "^0.1.10",
+    "karma-phantomjs-launcher": "^0.1.4",
+    "karma-sauce-launcher": "^0.2.10",
+    "mocha": "^2.2.4",
+    "smash": "0.0.14",
     "uglify-js": "latest"
   },
   "preferGlobal": true,
@@ -52,9 +69,9 @@
     "riot+compiler.min.js"
   ],
   "bin": {
-    "riot": "lib/cli.js"
+    "riot": "lib/server/cli.js"
   },
-  "main": "lib/compiler.js",
+  "main": "lib/server/index.js",
   "browser": "riot.js",
   "spm": {
     "main": "riot.js",

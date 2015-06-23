@@ -5,7 +5,7 @@ nogen: true
 
 # Router
 
-Riot router is the most minimal router implementation you can find and it works consistently on all browsers including IE8. It only listen to changes on the URL hash (the part after the `#` character). Most single page applications deal with the hash only but if you really care about full URL changes you should use a different router implementation.
+The Riot Router is the most minimal router implementation you can find and it works consistently on all browsers including IE8. It only listens to changes on the URL hash (the part after the `#` character). Most single page applications deal with the hash only but if you really care about full URL changes you should use a different router implementation.
 
 The Riot router is best in routing schemes in which the route's hierarchical parts, after the "#", are separated with the "/" character. In that case Riot gives you direct access to these parts.
 
@@ -35,6 +35,24 @@ The hash can change in the following ways:
 2. When the back/forward buttons are pressed
 3. When `riot.route(to)` is called
 
+### riot.route.start() | #route-start
+
+Start listening the window hash changes and it's automatically called when riot gets loaded. You typically use this method together with [route.stop](#route-stop). Example:
+
+``` js
+riot.route.stop() // clear all the old riot.route callbacks
+riot.route.start() // start again
+```
+
+### riot.route.stop() | #route-stop
+
+Remove the hashchange listeners clearing also the [route.route](#route) callbacks.
+
+``` js
+riot.route.stop()
+```
+
+Stopping the default router allow the use of a different router on your appliaction.
 
 ### riot.route(to) | #route-to
 

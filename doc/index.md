@@ -1,5 +1,5 @@
 
-title: Riot 2.0 | A React- like UI library
+title: Riot 2.0 | A React-like UI library
 subtitle: Why Riot?
 description: And why we need a new UI library
 body_id: riot-home
@@ -27,7 +27,7 @@ Riot brings custom tags to all browsers starting from IE8.
   </form>
 
   <!-- logic -->
-  &lt;script>
+  <script>
     this.items = []
 
     add(e) {
@@ -39,7 +39,7 @@ Riot brings custom tags to all browsers starting from IE8.
 
 </todo>
 ```
-A custom tag glues relevant HTML and JavaScript together forming a reusable component. You can roughly think of React + Polymer, but squeezed into 2.5KB.
+A custom tag glues relevant HTML and JavaScript together forming a reusable component. Think React + Polymer but with enjoyable syntax and a small learning curve.
 
 
 ### Human-readable
@@ -60,7 +60,7 @@ Custom tags let you build complex views with HTML. Your application might look s
 
   <forum-footer/>
 
-  &lt;script>riot.mount('*', { api: forum_api })</script>
+  <script>riot.mount('*', { api: forum_api })</script>
 </body>
 ```
 
@@ -74,6 +74,7 @@ HTML syntax is the *de facto* language of the web and it's designed for building
 - One way data flow: updates and unmounts are propagated downwards from parent to children.
 - Expressions are pre-compiled and cached for high performance.
 - Lifecycle events for more control.
+- Server-side rendering of custom tags
 
 
 ### Close to standards
@@ -85,7 +86,7 @@ HTML syntax is the *de facto* language of the web and it's designed for building
 
 
 ### Use your favorite tools
-- Create tags with CoffeeScript, Jade, Typescript, ES6 or [any pre-processor](compiler.html#pre-processors) you want.
+- Create tags with CoffeeScript, Jade, Typescript, LiveScript, ES6 or [any pre-processor](compiler.html#pre-processors) you want.
 - Integrate with NPM, CommonJS, AMD, Bower or Component
 - Develop with [Gulp](https://github.com/e-jigsaw/gulp-riot), [Grunt](https://github.com/ariesjia/grunt-riot) or [Browserify](https://github.com/jhthorsen/riotify) plugins
 
@@ -103,7 +104,7 @@ One of the design goals was to introduce a powerful tag syntax with as little bo
 - Power shortcuts: `class={ enabled: is_enabled, hidden: hasErrors() }`.
 - No extra brain load such as `render`, `state`, `constructor` or `shouldComponentUpdate`
 - Interpolation: `Add #{ items.length + 1 }` or `class="item { selected: flag }"`
-- `<script>` tag to enclose the logic is optional
+- The `<script>` tag to enclose the logic is optional
 - Compact ES6 method syntax
 
 
@@ -147,7 +148,10 @@ Riot is an "open stack". It's meant for developers who want to avoid framework s
 
 Today I have used #riotjs 2.0 for the first time and I could admit that It will be a long term relationship #js highly recommended. [@gianlucaguarini](https://twitter.com/gianlucaguarini/status/559756081862574080)
 
-I am not a fan of the custom tags and DOM events binding but I've tested riotjs and it is damn fast/performant #impressed. [‏@gianlucaguarini](https://twitter.com/gianlucaguarini/status/559429908179714049)
+I liked the idea of #reactjs with #flux but I like #riotjs with #riotcontrol even better!
+[@tscok](https://twitter.com/tscok/status/580509124598829056)
+
+I’m loving riot.js! So much power packed into 3.5kb. [@ncthis](https://twitter.com/ncthis/status/575204037877833728)
 
 looking at RiotJS https://muut.com/riotjs/  - blown away by its simplicity. [@defeated](https://twitter.com/defeated/status/559215403541757952)
 

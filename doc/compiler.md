@@ -15,7 +15,7 @@ Custom tags need to be transformed to JavaScript before the browser can execute 
 <my-tag></my-tag>
 
 <!-- inlined tag definition -->
-&lt;script type="riot/tag">
+<script type="riot/tag">
   <my-tag>
     <h3>Tag layout</h3>
     <inner-tag />
@@ -30,7 +30,7 @@ Custom tags need to be transformed to JavaScript before the browser can execute 
 
 
 <!-- mount normally -->
-&lt;script>
+<script>
 riot.mount('*')
 </script>
 ```
@@ -38,6 +38,20 @@ riot.mount('*')
 The script tag and the external file can contain multiple tags definitions combined with regular javascript.
 
 Riot automatically takes inlined and external tags and compiles them before the tags are rendered with the `riot.mount()` call.
+
+### Access tag instances
+If you are loading tags with `script src` and want to get access to the mounted tags you need to wrap the call with `riot.compile` as follows:
+
+```
+<script>
+riot.compile(function() {
+  // here tags are compiled and riot.mount works synchronously
+  var tags = riot.mount('*')
+})
+</script>
+```
+
+### Compiler performance
 
 Compilation phase is basically free and takes no time at all. Compiling a [timer tag](https://github.com/muut/riotjs/blob/master/test/tag/timer.tag) 30 times takes 2 milliseconds on a regular laptop. If you have a crazy page with 1000 different timer-sized tags, the compilation takes around 35ms.
 
@@ -66,7 +80,7 @@ Pre- compilation on the server gives you following benefits:
 - "Isomorphic apps" and the ability to pre- render tags on the server (released soon).
 
 
-Pre-compilation happens with a `riot` executable, which can be installed with with NPM as follows:
+Pre-compilation happens with a `riot` executable, which can be installed with NPM as follows:
 
 ``` sh
 npm install riot -g
@@ -87,11 +101,10 @@ With pre-compilation your HTML is something like this:
 <script src="path/to/javascript/with-tags.js"></script>
 
 <!-- mount the same way -->
-&lt;script>
+<script>
 riot.mount('*')
 </script>
 ```
-
 
 ### Using
 
@@ -160,10 +173,20 @@ The compile function takes a string and returns a string.
 
 This is the main fruit of pre- compilation. You can use your favourite pre- processor to create custom tags. Both HTML and JavaScript processor can be customized.
 
+The source language is specified with `--type` or `-t` argument on the command line or you can define the language on the script tag as follows:
+
+```
+<my-tag>
+  <h3>My layout</h3>
+
+  <script type="coffeescript">
+    @hello = 'world'
+  </script>
+</my-tag>
+```
+
 
 ### CoffeeScript
-
-The source language is specified with `--type` or `-t` argument:
 
 ``` sh
 # use coffeescript pre-processor
@@ -216,15 +239,17 @@ An sample tag written in ES6:
 </test>
 ```
 
-All ECMAScript 6 [features](https://github.com/lukehoban/es6features) can be used. [6to5](https://6to5.org/) is used for the transformation:
+All ECMAScript 6 [features](https://github.com/lukehoban/es6features) can be used. [Babel](https://babeljs.io/) is used for the transformation:
 
 ``` sh
-npm install 6to5
+npm install babel
 ```
+
+Here is a [bigger example](https://github.com/txchen/feplay/tree/gh-pages/riot_babel) on using Babel with Riot.
 
 ### TypeScript
 
-TypeScript adds type to JavaScript. Use `--type typescript` to enable it:
+TypeScript adds optional static typing to JavaScript. Use `--type typescript` to enable it:
 
 ``` sh
 # use TypeScript pre-processor
@@ -329,6 +354,36 @@ var js = riot.compile(source_string, { parser: myParser, expr: true })
 
 Set `expr: true` if you want the expressions to be parsed as well.
 
+#### riot.parsers on the browser and the server
+
+You can also create your custom riot parsers adding them to the `riot.parsers` property and share them across the browsers and server. For example
+
+```js
+riot.parsers.js.myJsParser = function(js, options) {
+  return doYourThing(js, options)
+}
+
+riot.parsers.css.myCssParser = function(tagName, css) {
+  return doYourThing(tagName, css)
+}
+```
+
+Once you have created your own `riot.parsers` you will be able to compile your tags using them in the following way
+
+```html
+<custom-parsers>
+  <p>hi</p>
+  <style type="text/myJsParser">
+    @tag {color: red;}
+  </style>
+  <script type="text/myCssParser">
+    this.version = "@version"
+  </script>
+</custom-parsers>
+```
+
+
+
 
 ### No transformation
 
@@ -338,5 +393,35 @@ By default Riot uses a build-in transpiler that simply enables shorter ES6- styl
 # no pre-processor
 riot --type none --expr source.tag
 ```
+
+### AMD and CommonJS
+
+Riot tags can be compiled with `AMD` (Asynchronous Module Definition) and `CommonJS` support. This configuration option is necessary if Riot is used with an AMD loader such as [RequireJS](http://requirejs.org/) or a CommonJS loader such as [Browserify](http://browserify.org/).
+
+The Riot library must be defined / required as `riot` in both cases.
+
+``` sh
+# enable AMD and CommonJS
+riot --m
+```
+
+Example AMD:
+
+```js
+
+define(['riot', 'tags'], function (riot) {
+  riot.mount('*');
+});
+```
+
+Example CommonJS:
+
+```js
+var riot = require('riot');
+var tags = require('tags');
+
+riot.mount('*');
+```
+
 
 If you make something great, please [share it](https://github.com/muut/riotjs/issues/58) !

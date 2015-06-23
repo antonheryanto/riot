@@ -1,10 +1,5 @@
-
 <inner-html>
+  <h1>Hello, <yield/></h1>
 
-  <h3 name="title">Tag title</h3>
-
-  this.one('mount', function() {
-    this.root.appendChild(this.title)
-  })
-
+  this.greeting = 'World'
 </inner-html>

@@ -6,6 +6,58 @@ body_id: riot-releases
 
 ====
 
+### 2.0.15 *Apr 23, 2015*
+
+- A new `<yield>` core tag allowing [html transclusion](/riotjs/guide/#nested-html)
+- A new [riot-tag](/riotjs/guide/#riot-tag) attribute to use standard HTML elements as mount nodes
+- `tag.unmount(flag)` to decide whether the parent should be removed or not from the DOM
+- `riot.route.start()` and `riot.route.stop()` methods to start and stop the Riot router. These methods allow the use of a different router on your appliaction.
+- The server side compiiler now supports AMD and CommonJS modules with `--modular` or `-m` command line option
+- Numerous [bug fixes](https://github.com/muut/riotjs/issues/584)
+- Special thanks to *[@GianlucaGuarini](https://github.com/GianlucaGuarini)* for this release
+
+
+### 2.0.14 *Apr 8, 2015*
+
+- [Server side rendering](/riotjs/guide/#server-side)
+- [Bug fixes](https://github.com/muut/riotjs/compare/v2.0.13...v2.0.14)
+
+### 2.0.13 *Mar 11, 2015*
+
+- A large bug fix release consisting of [pull requests](https://github.com/muut/riotjs/compare/v2.0.12...v2.0.13) from the community only. Thank you!
+- Larger [test suite](https://github.com/muut/riotjs/tree/master/test)
+
+### 2.0.12 *Mar 2, 2015*
+
+- Support for [Scoped CSS](/riotjs/guide/#scoped-css)
+- Direct [access to nested tags](/riotjs/api/#nested-tags) and their API via `tags` variable. For example: `tags.my_timer.clear()`
+- The custom tags are now constructed on parse time and initialized on mount time. This is preliminary work for the upcoming [plugin system](https://github.com/muut/riotjs/issues/416) and allows plugins to do their thing before initialization as well.
+- `--whitespace` compiler option to preserve newlines and whitespace on the generated output. Good with nested `pre` and `textarea` elements.
+- Using [Karma](http://karma-runner.github.io/0.12/index.html) for cross browser testing
+- *WARNING* the deprecated `riot.mountTo` will be removed on the next release
+
+
+### 2.0.11 *Feb 23, 2015*
+
+- `riot.mount` now accepts the same parameters as `riot.mountTo`, which is now *deprecated*
+- New `riot.mount(selector, tagName, opts)` allows you to mount a certain tag to any selection of HTML elements
+- `riot.unmount` followed with `riot.mount` now correcly replaces the earlier tag
+- Test suite v1. Expect this to grow in size and functionality. Thanks to [@GianlucaGuarini](https://github.com/GianlucaGuarini)
+
+
+### 2.0.10 *Feb 19, 2015*
+
+- [Todo MVC example](https://github.com/txchen/feplay/tree/gh-pages/riot_todo)
+- Array items can be sorted and reordered and the view updates accordingly. Thanks to [@pakastin](https://github.com/pakastin)!
+- Nested `style` tags are automatically inject into `<head>` to avoid duplicate definitions
+- Ability to define tags on the same line: `<tag></tag>`
+- Single line ES6 style methods: `foo() { this.bar = 'baz' }`
+- No illegal server requests with images: `<img src={ src }>`
+- Fix compiler to support custom brackets
+- `this.update()` is no longer needed when defining tags manually with `riot.tag`. This method is now automatically called after an event handler is executed
+- [Contributing guidelines](https://github.com/muut/riotjs/blob/master/CONTRIBUTING.md)
+
+
 ### 2.0.9 *Feb 13, 2015*
 
 - LiveScript support

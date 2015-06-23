@@ -11,13 +11,15 @@
   </style>
 
   <!--[if lt IE 9]>
-    <script src="ie8/es5-shim.js"></script>
-    <script src="ie8/html5-shiv.js"></script>
+    <script src="polyfills/es5-shim.js"></script>
+    <script src="polyfills/html5-shiv.js"></script>
     <script>
       html5.addElements(
-        'timetable timer loop-manip loop-child looped-child loop-context loop-strings mung ' +
-        'loop-replace loop-position tag-nesting inner1 inner2 inner-html loop-object ' +
-        'loop-multi loop-nested table-data if-test if-child treeview lazy-if treeitem'
+        'yield timetable timer loop-manip loop-child looped-child loop-context yield-child yield-child-2 yield-parent yield-loop' +
+        'loop-strings img-test loop-replace loop-position tag-nesting ' +
+        'inner1 inner2 loop-option inner-html yield-parent inner-content loop-object loop-multi ' +
+        'loop-nested table-data if-test if-child treeview lazy-if ' +
+        'treeitem expr-parent expr-child form-controls isloop-test plans plan'
       )
     </script>
   <![endif]-->
@@ -28,25 +30,53 @@
 
   <div id="tags">
 
-    <loop-replace></loop-replace>
-
     <!--
+    -->
+    <form-controls></form-controls>
+    <isloop-test></isloop-test>
+
     <if-test></if-test>
-    <touch-events></touch-events>
-    <mung></mung>
-    <lazy-if></lazy-if>
-    <loop-manip></loop-manip>
-    <loop-multi></loop-multi>
     <loop-object></loop-object>
-    <loop-child></loop-child>
+    <img-test></img-test>
+
+    <shared-opts val="1"></shared-opts>
+    <shared-opts val="2"></shared-opts>
+
+    <loop-replace></loop-replace>
+    <touch-events></touch-events>
+    <lazy-if></lazy-if>
+    <loop-multi></loop-multi>
     <loop-context></loop-context>
+    <loop-option></loop-option>
     <table-data></table-data>
     <timetable></timetable>
+    <div riot-tag="table-data"></div>
     <loop-strings></loop-strings>
     <loop-position></loop-position>
-    <inner-html><h3>Inner title</h3></inner-html>
-    <tag-nesting></tag-nesting>
     <loop-nested></loop-nested>
+    <loop-equalitems></loop-equalitems>
+    <loop-reorder></loop-reorder>
+    <expr-parent></expr-parent>
+
+    <tag-nesting></tag-nesting>
+
+    <loop-child></loop-child>
+    <loop-manip></loop-manip>
+
+
+    <inner-html>
+      { greeting }
+    </inner-html>
+    <yield-parent>
+      { greeting }
+      <div>Something else</div>
+    </yield-parent>
+    <yield-loop>
+      { greeting }
+      <div>Something else</div>
+    </yield-loop>
+    <!--
+
     <treeview></treeview>
     -->
 
@@ -54,7 +84,6 @@
 
   <script src="../dist/riot/riot.js"></script>
   <script src="../dist/tags.js"></script>
-  <script>var tags = riot.mount('*')</script>
+  <script>var tags = riot.mount('*', { test: { zap: 100 }})</script>
 
 </body>
-

@@ -1,45 +1,87 @@
-f
+
 nogen: true
 
 ====
 
 # Custom tags
 
-### riot.mount(selector, [opts]) | #mount
+### riot.mount(customTagSelector, [opts]) | #mount
 
-Mounts (constructs) all custom tags on the document specified by `selector`. Optional `opts` object is passed to the tags for consumption. Examples:
+Where
+
+- `customTagSelector` selects elements from the page and mounts them with a custom tag. The selected elements' name must match the custom tag name.
+- `opts` optional object is passed for the tags to consume. This can be anything, ranging from a simple object to a full application API. Or it can be a Flux- store. Really depends on how you want to structure your client-side applications. Read more about [modular Riot applications](/riotjs/guide/#modularity).
+
 
 ``` js
-// mount all <plans> and <pricing> tags on the page
-riot.mount('plans pricing')
+// selects and mounts all <pricing> tags on the page
+var tags = riot.mount('pricing')
 
 // mount all custom tags with a class name .customer
-riot.mount('.customer')
+var tags = riot.mount('.customer')
 
 // mount <account> tag and pass an API object as options
-riot.mount('account', api)
+var tags = riot.mount('account', api)
 ```
 
-The passed options can be anything, ranging from a simple object to a full application API. Or it can be a Flux- store. Really depends on how you want to structure your client-side applications.
+@returns: an array of the mounted [tag instances](#tag-instance)
 
-Internally the selector is passed to `document.querySelectorAll(selector)`. A special Riot specific selector "*" can be used to mount all custom tags on the page:
+### riot.mount('*', [opts]) | #mount-star.
+
+A special Riot specific selector "*" can be used to mount all custom tags on the page:
 
 ``` js
 riot.mount('*')
 ```
 
-@returns: an array of [tag instances](#tag-instance)
+@returns: an array of the mounted [tag instances](#tag-instance)
+
+
+### riot.mount(selector, tagName, [opts]) | #mount-tag
+
+Where
+
+- `selector` selects any DOM nodes from the page to be mounted
+- `tagName` specifies the custom tag name to be used
+- `opts` optional object is passed for the tags to consume
+
+
+``` js
+// mounts custom tag "my-tag" to div#main and pass api as options
+var tags = riot.mount('div#main', 'my-tag', api)
+```
+
+@returns: an array of the mounted [tag instances](#tag-instance)
+
+
+### riot.mount(domNode, tagName, [opts]) | #mount-dom
+
+Mount a custom tag named tagName on a given domNode passing optional data with opts. For example:
+
+```
+// mounts "my-tag" to given DOM node
+riot.mount(document.getElementById('slide'), 'users', api)
+```
+
+@returns: mounted [tag instance](#tag-instance)
 
 
 ### riot.mountTo(domNode, tagName, [opts]) | #mount-to
 
-Mount a custom tag named `tagName` on a given `domNode` passing optional data with `opts`. For example:
+This method is deprecated since *v2.0.11*. This is the same as `riot.mount(domNode, tagName, [opts])`.
 
-``` js
-riot.mountTo(document.getElementById('slide'), 'users', api)
+
+### riot.render(tagName, [opts]) | #render
+
+Rendering a tag to html. This method is only available on *server-side* (Node/io.js). For example:
+
+```
+// render "my-tag" to html
+var mytag = require('my-tag')
+riot.render(mytag, { foo: 'bar' })
 ```
 
-This is helpful in the case in which you find you often need to install a different tag on the same DOM node (ie. slideshows, dialogs, alert boxes) or when you want to enrich existing DOM nodes with Riot tags but you can't place custom tags in the markup because it's out of your control.
+@returns: tags render as html
 
 
 ## Tag instance
@@ -49,6 +91,8 @@ Following properties are set for each tag instance:
 - `opts` - the options object
 - `parent` - the parent tag if any
 - `root` - root DOM node
+- `tags` - nested custom tags
+
 
 You can use these references in both the HTML and JavaScript code. For example:
 
@@ -71,6 +115,49 @@ You can freely set any data to the instance (aka "context") and they are availab
 </my-tag>
 ```
 
+### Nested tags
+
+You have access to nested tag instances via `tags` variable:
+
+``` html
+<my-tag>
+
+  <child></child>
+
+  // access to child tag
+  var child = this.tags.child
+
+</my-tag>
+```
+
+You can also use the `name` attribute to give another name for the nested tag.
+
+``` html
+<my-tag>
+
+  <child name="my_nested_tag"></child>
+
+  // access to child tag
+  var child = this.tags.my_nested_tag
+
+</my-tag>
+```
+
+The child tags are initialized after the parent tag so the methods and properties are available on the "mount" event.
+
+``` html
+<my-tag>
+
+  <child name="my_nested_tag"></child>
+
+  // access to child tag methods
+  this.on('mount', function() {
+    this.tags.my_nested_tag.someMethod()
+  })
+
+</my-tag>
+```
+
 
 ### this.update() | #tag-update
 
@@ -82,7 +169,7 @@ Other than that riot does not update the UI automatically so you need to call th
 <my-tag>
 
   <input name="username" onblur={ validate }>
-  <span class="tooltip" show={ error }>{ error }</my-tag>
+  <span class="tooltip" show={ error }>{ error }</span>
 
   var self = this
 
@@ -117,9 +204,22 @@ self.update({ error: error_message })
 which is shorter and cleaner.
 
 
-### this.unmount() | #tag-unmount
+### this.unmount(keepTheParent) | #tag-unmount
 
 Detaches the tag and it's children from the page. An "unmount" event is fired.
+If you want to unmount a tag without removing the parent tag you need to pass `true` to the unmount method
+
+Remove the tag from the DOM:
+
+``` js
+mytag.unmount()
+```
+
+Remove the tag children and keep only the parent tag:
+
+``` js
+mytag.unmount(true)
+```
 
 
 #### Events
@@ -128,6 +228,7 @@ Each tag instance is an [observable](#observable) so you can use `on` and `one` 
 
 
 - "update" – right before the tag is updated. allows recalculation of context data before the UI expressions are updated.
+- "updated" – right after the tag is updated. allows do some work with updated DOM
 - "mount" – right after tag is mounted on the page
 - "unmount" – after the tag is removed from the page
 
@@ -162,34 +263,39 @@ The above method and property names are reserved words for Riot tags. Don't use 
 ```
 
 
-### riot.tag(tagName, html, [constructor]) | #tag
+### riot.tag(tagName, html, [css], [attrs], [constructor]) | #tag
 
 Creates a new custom tag "manually" without the compiler.
 
 - `tagName` the tag name
 - `html` is the layout with [expressions](/riotjs/guide/#expressions)
+- `css` is the style for the tag (optional)
+- `attrs` string of attributes for the tag (optional).
 - `constructor` is the initialization function being called before the tag expressions are calculated and before the tag is mounted
 
 
 #### Example
 
 ``` js
-riot.tag('timer', '<p>Seconds Elapsed: { time }</p>', function (opts) {
-  this.time = opts.start || 0
+riot.tag('timer',
+  '<p>Seconds Elapsed: { time }</p>',
+  'timer { display: block; border: 2px }',
+  'class="tic-toc"',
+  function (opts) {
+    var self = this
+    this.time = opts.start || 0
 
-  this.tick = (function () {
-    this.update({
-        time: ++this.time
+    this.tick = function () {
+      self.update({ time: ++self.time })
+    }
+
+    var timer = setInterval(this.tick, 1000)
+
+    this.on('unmount', function () {
+      clearInterval(timer)
     })
-  }).bind(this)
 
-  var timer = setInterval(this.tick, 1000)
-
-  this.on('unmount', function () {
-    clearInterval(timer)
   })
-
-})
 ```
 
 See [timer demo](http://jsfiddle.net/gnumanth/h9kuozp5/) and [riot.tag](/riotjs/api/#tag) API docs for more details and *limitations*.
@@ -201,26 +307,24 @@ See [timer demo](http://jsfiddle.net/gnumanth/h9kuozp5/) and [riot.tag](/riotjs/
 2. Unquoted expressions. Write `value="{ val }"` instead of `value={ val }`
 3. Boolean attributes. Write `__checked="{ flag }"` instead of `checked={ flag }`
 4. Shorthand ES6 method signatures
-5. `this.update()` must be manually called on an event handler
+5. `<img src={ src }>` must be written as `<img riot-src={ src }>` in order to avoid illegal server requests
+6. `style="color: { color }"` must be written as `riot-style="color: { color }"` so that style attribute expressions work in IE.
 
-You can take advantage of `template` or `script` tags as follows:
+
+You can take advantage of `<template>` or `<script>` tags as follows:
 
 ```
-&lt;script type="tmpl" id="my_tmpl">
+<script type="tmpl" id="my_tmpl">
   <h3>{ opts.hello }</h3>
   <p>And a paragraph</p>
 </script>
 
-&lt;script>
+<script>
 riot.tag('tag-name', my_tmpl.innerHTML, function(opts) {
 
 })
 </script>
 ```
-
-This method is on the edge of being depreciated.
-
-
 
 ### riot.update() | #update
 
@@ -228,4 +332,100 @@ Updates all the mounted tags and their expressions on the page.
 
 @returns: an array of [tag instances](#tag-instance) that are mounted on the page.
 
+### Html transclusion using the `<yield>` tag | #yield
 
+The `<yield>` tag it's a special riot core feature that allows you to inject and compile the content of any custom tag inside its template in runtime
+This technique allows you to extend your tags templates with html contents rendered eventually from the server
+
+For example using the following riot tag `my-post`
+
+``` html
+<my-post>
+  <h1>{ opts.title }</h1>
+  <yield/>
+  this.id = 666
+</my-post>
+```
+
+anytime you will include the `<my-post>` tag in your app
+
+``` html
+<my-post title="What a great title">
+  <p id="my-content-{ id }">My beautiful post is just awesome</p>
+</my-post>
+```
+
+once mounted `riot.mount('my-post')` it will be rendered in this way:
+
+``` html
+<my-post>
+  <h1>What a great title</h1>
+  <p id="my-content-666">My beautiful post is just awesome</p>
+</my-post>
+```
+
+#### Loops and children using `<yield>` | yield-loops-children
+
+The `<yield>` tag could be used also in a loop or in a child tag but you should be aware that __it will be always parsed and compiled using the child data__
+
+The following `blog.tag` riot component
+
+``` html
+
+<blog>
+  <h1>{ title }</h1>
+  <my-post each={ posts }>
+    <a href={ this.parent.backToHome }>Back to home</a>
+    <div onclick={ this.parent.deleteAllPosts }>Delete all the posts</div>
+  </my-post>
+
+  this.backToHome = '/homepage'
+  this.title = 'my blog title'
+
+  this.posts = [
+    { title: "post 1", description: 'my post description' },
+    { title: "post 2", description: 'my post description' }
+  ]
+
+  // the bind is needed in this case to keep the parent context
+  // also in the child tags
+  deleteAllPosts() {
+    this.posts = []
+
+    // we need to trigger manually the update function
+    // because this function gets triggered from a child tag
+    // and it does not bubble up automatically
+    this.update()
+  }.bind(this)
+
+</blog>
+
+<my-post>
+  <h2>{ title }</h2>
+  <p>{ description }</p>
+  <yield/>
+</my-post>
+
+```
+
+will be compiled in this way:
+
+``` html
+
+<blog>
+  <h1>my blog title</h1>
+  <my-post>
+      <h2>post 1</h2>
+      <p>my post description</p>
+      <a href="/homepage">Back to home</a>
+      <div>Delete all the posts</div>
+  </my-post>
+  <my-post>
+      <h2>post 2</h2>
+      <p>my post description</p>
+      <a href="/homepage">Back to home</a>
+      <div>Delete all the posts</div>
+  </my-post>
+</blog>
+
+```

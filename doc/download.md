@@ -1,12 +1,10 @@
 
-title: Download Riot
-subtitle: Get Riot
+title: Get Riot
 description: none
 minify: false
 
 base: https://raw.githubusercontent.com/muut/riotjs/master
 cdnjs: https://cdnjs.cloudflare.com/ajax/libs/riot
-version: 2.0
 
 ====
 
@@ -54,7 +52,6 @@ version: 2.0
 `{{ cdnjs }}/{{ riot_version }}/riot.min.js`
 
 
-
 ### Package managers
 
 #### [Bower](http://bower.io/search/?q=riot.js)
@@ -88,7 +85,7 @@ For IE8 support you need to include [es5-shim](https://github.com/es-shims/es5-s
   <!--[if lt IE 9]>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.0.5/es5-shim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.2/html5shiv.min.js"></script>
-    &lt;script>html5.addElements('test')</script>
+    <script>html5.addElements('test')</script>
   <![endif]-->
 </head>
 ```
@@ -96,7 +93,7 @@ For IE8 support you need to include [es5-shim](https://github.com/es-shims/es5-s
 Also let it know about all your custom tags before using them on a page:
 
 ``` html
-&lt;script>html5.addElements('my-tag my-another-tag')</script>
+<script>html5.addElements('my-tag my-another-tag')</script>
 ```
 
 That's a space separated list of tag names.
@@ -104,7 +101,6 @@ That's a space separated list of tag names.
 
 ## Known issues
 
-- `each` attribute does not detect if the looped items are sorted or otherwise re-ordered
 - Looping table rows or cells with `each` attribute is not working on IE8 and IE9.
 
 

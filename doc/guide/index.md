@@ -8,7 +8,7 @@ minify: false
 
 # Custom tag example
 
-Riot custom tags are the building blocks for user interfaces. They make the "view" part of the application. Here is an extended TODO example showing various features of Riot:
+Riot custom tags are the building blocks for user interfaces. They make the "view" part of the application. Let's start with an extended TODO example highlighting various features of Riot:
 
 ```
 <todo>
@@ -28,7 +28,7 @@ Riot custom tags are the building blocks for user interfaces. They make the "vie
     <button disabled={ !text }>Add #{ items.length + 1 }</button>
   </form>
 
-  &lt;script>
+  <script>
     this.disabled = true
 
     this.items = opts.items
@@ -56,27 +56,29 @@ Riot custom tags are the building blocks for user interfaces. They make the "vie
 
 Custom tags are [compiled](compiler.html) to JavaScript.
 
-See [live demo](http://muut.github.io/riotjs/demo/), browse the [sources](https://github.com/muut/riotjs/tree/gh-pages/demo), or download the [zip](https://github.com/muut/riotjs/archive/gh-pages.zip).
+See the [live demo](http://muut.github.io/riotjs/demo/), browse the [sources](https://github.com/muut/riotjs/tree/gh-pages/demo), or download the [zip](https://github.com/muut/riotjs/archive/gh-pages.zip).
 
 
 
 ### Tag syntax
 
-Riot tag is a combination of layout (HTML) and logic (JavaScript). Here are the basic rules:
+A Riot tag is a combination of layout (HTML) and logic (JavaScript). Here are the basic rules:
 
-* HTML is defined first and the logic is enclosed inside optional `<script>` tag.
-* Without `<script>` tag the JavaScript starts where the last HTML tag ends.
-* Tags can be empty, HTML only or JavaScript only and `{ expressions }` are optional.
+* HTML is defined first and the logic is enclosed inside an optional `<script>` tag. *note: the script tag can not be used when including tag definitions in the document body, only in external tag files*
+* Without the `<script>` tag the JavaScript starts where the last HTML tag ends.
+* Custom tags can be empty, HTML only or JavaScript only
 * Quotes are optional: `<foo bar={ baz }>` becomes `<foo bar="{ baz }">`.
 * ES6 method syntax is supported: `methodName()` becomes `this.methodName = function()` and `this` variable always points to the current tag instance.
-* A shorthand syntax for class names is available: `class={ completed: done }`.
+* A shorthand syntax for class names is available: `class={ completed: done }` renders to `class="completed"`when the value of `done` is a true value.
 * Boolean attributes (checked, selected etc..) are ignored when the expression value is falsy: `<input checked={ undefined }>` becomes `<input>`.
+* All attribute names must be *lowercase*.
 * Self-closing tags are supported: `<div/>` equals `<div></div>`. Well known "open tags" such as `<br>`, `<hr>`, `<img>` or `<input>` are never closed after the compilation.
-* Nested `<style>` tags are supported, but nested expressions are not evaluated
+* Custom tags always need to be closed (normally or self-closed).
 * Standard HTML tags (`label`, `table`, `a` etc..) can also be customized, but not necessarily a wise thing to do.
-* Custom tags always needs to be closed (normally or self-closed).
 
-Tag definition always starts on the beginning of the line:
+
+
+Tag definition in tag files always starts on the beginning of the line:
 
 ```
 <!-- works -->
@@ -84,11 +86,16 @@ Tag definition always starts on the beginning of the line:
 
 </my-tag>
 
+<!-- also works -->
+<my-tag></my-tag>
+
   <!-- this fails, because of indentation -->
   <my-tag>
 
   </my-tag>
 ```
+
+Inline tag definitions(in document body) must be properly indented, with all custom tags equally indented at the lowest indent level, mixing of tabs and spaces is discouraged.
 
 ### No script tag
 
@@ -124,6 +131,46 @@ Currently available options are "coffeescript", "typescript", "es6" and "none". 
 See [pre processors](/riotjs/compiler.html#pre-processors) for more details.
 
 
+### Tag styling
+
+You can put a `style` tag inside. Riot.js automatically takes it out and injects it into `<head>`.
+
+```html
+<todo>
+
+  <!-- layout -->
+  <h3>{ opts.title }</h3>
+
+  <style>
+    todo { display: block }
+    todo h3 { font-size: 120% }
+    /** other tag specific styles **/
+  </style>
+
+</todo>
+```
+
+### Scoped CSS
+
+[Scoped CSS](https://developer.mozilla.org/en-US/docs/Web/CSS/:scope) is also available. The example below is equivalent to the first one.
+
+```html
+<todo>
+
+  <!-- layout -->
+  <h3>{ opts.title }</h3>
+
+  <style scoped>
+    :scope { display: block }
+    h3 { font-size: 120% }
+    /** other tag specific styles **/
+  </style>
+
+</todo>
+```
+
+This happens once, no matter how many times the tag is initialized.
+
 ## Mounting
 
 Once a tag is created you can mount it on the page as follows:
@@ -136,16 +183,19 @@ Once a tag is created you can mount it on the page as follows:
   <todo></todo>
 
   <!-- include riot.js -->
-  &lt;script src="riot.min.js"></script>
+  <script src="riot.min.js"></script>
 
   <!-- include the tag -->
-  &lt;script src="todo.js" type="riot/tag"></script>
+  <script src="todo.js" type="riot/tag"></script>
 
   <!-- mount the tag -->
-  &lt;script>riot.mount('todo')</script>
+  <script>riot.mount('todo')</script>
 
 </body>
 ```
+
+Custom tags inside the `body` of the page needs to be closed normally: `<todo></todo>` and self-closing: `<todo/>` is not supported.
+
 
 Some example uses of the mount method:
 
@@ -160,7 +210,7 @@ riot.mount('#my-element')
 riot.mount('todo, forum, comments')
 ```
 
-Document can contain multiple instances of the same tag.
+A document can contain multiple instances of the same tag.
 
 
 ### Options
@@ -168,7 +218,7 @@ Document can contain multiple instances of the same tag.
 You can pass options for tags in the second argument
 
 ```
-&lt;script>
+<script>
 riot.mount('todo', { title: 'My TODO app', items: [ ... ] })
 </script>
 ```
@@ -189,17 +239,100 @@ Inside the tag the options can be referenced with the `opts` variable as follows
 </my-tag>
 ```
 
+
+### Mixins
+
+Mixins provide an easy way to share functionality across tags. When a tag is compiled by riot, any defined mixins are added and available to use in the tag.
+
+```
+var OptsMixin = {
+    init: function() {
+      this.on('updated', function() { console.log('Updated!') })
+    }
+
+    getOpts: function() {
+        return this.opts
+    },
+
+    setOpts: function(opts, update) {
+        this.opts = opts
+
+        if(!update) {
+            this.update()
+        }
+
+        return this
+    }
+}
+
+<my-tag>
+    <h1>{ opts.title }</h1>
+
+    this.mixin(OptsMixin)
+</my-tag>
+```
+
+In this example you are giving any instance of the `my-tag` Tag the `OptsMixin` which provides `getOpts` and `setOpts` methods. `init` method is special one which can initialize the mixin when it's loaded to the tag. (`init` method is not accessible from other method)
+
+```
+var my_tag_instance = riot.mount('my-tag')[0]
+
+console.log(my_tag_instance.getOpts()) //will log out any opts that the tag has
+```
+
+Tags will accept any object -- `{'key': 'val'}` `var mix = new function(...)` -- and will error out when any other type is passed to it.
+
+The `my-tag` definition now has a `getId` method added to it along with anything defined in the `OptsMixin`.
+
+```
+function IdMixin() {
+    this.getId = function() {
+        return this._id
+    }
+}
+
+var id_mixin_instance = new IdMixin()
+
+<my-tag>
+    <h1>{ opts.title }</h1>
+
+    this.mixin(OptsMixin, id_mixin_instance)
+</my-tag>
+```
+
+By being defined on the tag level, mixins not only extend the functionality of your tag, but also allows for a repeatable interface. Every time a tag is mounted, even sub-tags, the instance will have the mixed-in code.
+
+### Sharing mixin
+
+To share the mixins over files or projects, `riot.mixin` API is provided. You can register your mixin globally like this:
+
+```javascript
+riot.mixin('mixinName', mixinObject)
+```
+
+To load the mixin to the tag, use `mixin()` method with the key.
+
+```
+<my-tag>
+    <h1>{ opts.title }</h1>
+
+    this.mixin('mixinName')
+</my-tag>
+```
+
+
 ### Tag lifecycle
 
-Tag is created in following sequence:
+A tag is created in following sequence:
 
-1. Tag's JavaScript logic is executed
-2. HTML expressions are calculated and "update" event is fired
-3. Tag is mounted on the page and "mount" event is fired
+1. Tag is constructed
+2. Tag's JavaScript logic is executed
+3. HTML expressions are calculated and "update" event is fired
+4. Tag is mounted on the page and "mount" event is fired
 
 After the tag is mounted the expressions are updated as follows:
 
-1. Automatically after an event handler is called. For example the `toggle` method in the above example.
+1. Automatically after an event handler is called. (unless you set e.preventUpdate to true in your event handler) For example the `toggle` method in the above example.
 2. When `this.update()` is called on the current tag instance
 3. When `this.update()` is called on a parent tag, or any parent upwards. Updates flow uni-directionally from parent to child.
 4. When `riot.update()` is called, which globally updates all expressions on the page.
@@ -327,13 +460,15 @@ riot.settings.brackets = '${ }'
 riot.settings.brackets = '\{\{ }}'
 ```
 
-the start and end is separated with a space character.
+The start and end is separated with a space character.
+
+When using [pre-compiler](compiler.html#pre-compilation) you'll have to set `brackets` option there as well.
 
 
 
 ### Etc
 
-Expressions inside `<style>` tags are ignored.
+Expressions inside `style` tags are ignored.
 
 
 ### Render unescaped HTML
@@ -354,7 +489,7 @@ After the tag is defined you can use it inside other tags. For example
 <my-tag>
   <p>Here is some raw content: <raw content="{ html }"/> </p>
 
-  this.html = 'Hello, <strong>world!</raw>'
+  this.html = 'Hello, <strong>world!</strong>'
 </my-tag>
 ```
 
@@ -395,13 +530,48 @@ Then we mount the `account` tag to the page with a `plan` configuration option:
   <account></account>
 </body>
 
-&lt;script>
+<script>
 riot.mount('account', { plan: { name: 'small', term: 'monthly' } })
 </script>
 ```
 
 Parent tag options are passed with the `riot.mount` method and child tag options are passed on the tag attribute.
 
+<span class="tag red">important</span> Nested tags are always declared inside a parent custom tag. They are not initialized if they are defined on the page.
+
+### Nested HTML
+
+"HTML transclusion" is a way to process the inner HTML on the page. This is achieved with a build-in `<yield>` tag. Example:
+
+
+### Tag definition
+
+```html
+<my-tag>
+  <p>Hello <yield/></p>
+  this.text = 'world'
+</my-tag>
+```
+
+### Usage
+
+Custom tag is placed on a page with nested HTML
+
+```html
+<my-tag>
+  <b>{ text }</b>
+</my-tag>
+```
+
+### Result
+
+```html
+<my-tag>
+  <p>Hello <b>world</b><p>
+</my-tag>
+```
+
+See [API docs](/riotjs/api/#yield) for `yield`.
 
 ## Named elements
 
@@ -424,7 +594,7 @@ Elements with `name` or `id` attribute are automatically bound to the context so
 </login>
 ```
 
-Of course these named elements can be referred in HTML as well. `<div>{ username.value }</div>`
+Of course these named elements can be referred to in HTML as well: `<div>{ username.value }</div>`
 
 
 ## Event handlers
@@ -453,7 +623,7 @@ Attributes beginning with "on" (`onclick`, `onsubmit`, `oninput` etc...) accept 
 
 In the function `this` refers to the current tag instance. After the handler is called `this.update()` is automatically called reflecting all the possible changes to the UI.
 
-The default event handler behavior is *automatically cancelled*. This means that `e.preventDefault()` is already called for you, because this is what you usually want (or forget to do). You can let the browser do the default thing by returning `true` on the handler.
+The default event handler behavior is *automatically cancelled* unless the element is a checkbox or radio button. This means that `e.preventDefault()` is already called for you, because this is what you usually want (or forget to do). You can let the browser do the default thing by returning `true` on the handler.
 
 For example, this submit handler will actually submit the form to the server:
 
@@ -519,7 +689,7 @@ The element with the `each` attribute will be repeated for all items in the arra
 
 ### Context
 
-For each item a new context is created and the parent can be accessed with `parent.` prefix. For example:
+A new context is created for each item and the parent can be accessed through the `parent` variable. For example:
 
 
 ```
@@ -569,7 +739,7 @@ Event handlers can access individual items in a collection with `event.item`. No
 </todo>
 ```
 
-After the event handler is executed the current tag instance is updated using `this.update()` which causes all the looped items to execute as well. The parent notices that an item has been removed from the collection and removes the corresponding DOM node from the document.
+After the event handler is executed the current tag instance is updated using `this.update()` (unless you set e.preventUpdate to true in your event handler) which causes all the looped items to execute as well. The parent notices that an item has been removed from the collection and removes the corresponding DOM node from the document.
 
 
 ### Looping custom tags
@@ -618,47 +788,138 @@ Plain objects can also be looped. For example:
 Object loops are not recommended since internally Riot detects changes on the object with `JSON.stringify`. The *whole* object is studied and when there is a change the whole loop is re-rendered. This can be slow. Normal arrays are much faster and only the changes are drawn on the page.
 
 
-# Application architecture
+## Standard HTML Elements as tags | #riot-tag
+
+Standard HTML elements can be used as riot tags in the page body with the addition of the `riot-tag` attribute.
+
+```
+<ul riot-tag="my-tag"></ul>
+```
+
+This provides users with an alternative that can provide greater compatibility with css frameworks.  The tags are treated like any other custom tag.
+
+```
+riot.mount('my-tag')
+```
+
+will mount the `ul` element shown above as if it were `<my-tag></my-tag>`
+
+## Server-side rendering | #server-side
+
+Riot supports server-side rendering, with Node/io.js you can simply require tags and render to html:
+
+```
+var riot = require('riot')
+var timer = require('timer.tag')
+
+var html = riot.render(timer, { start: 42 })
+
+console.log(html) // <timer><p>Seconds Elapsed: 42</p></timer>
+```
+
+Loops and conditionals are supported.
+
+# Application design
 
 
 ## Tools, not policy
 
-Riot comes bundled with custom tags, an event emitter (observable) and router. We believe that these are the fundamental building blocks for client- side applications:
+Riot comes bundled with custom tags, an event emitter (observable) and router. We believe that these are the fundamental building blocks for client-side applications:
 
 1. Custom tags for the user interface,
-2. Events for modularity and
+2. Events for modularity, and
 3. Router for URL and the back button.
 
-Riot tries not to give strict rules, but rather the basic tools that you can creatively use. This flexible approach leaves the bigger architectural decisions for the developer.
+Riot tries not to enforce strict rules, but rather provide basic tools for you to use creatively. This flexible approach leaves the bigger architectural decisions up to the developer.
 
-We also think that the basic blocks should be minimal. In terms of file size and API size. Elementary stuff should be simple. This eases your mind.
+We also think that these building blocks should be minimal in terms of file size and API size. Elementary stuff should be simple so there's minimal cognitive load.
 
 
 ## Observable
 
-Observable is a generic tool to send and receive events. It's a common pattern to isolate modules without forming a dependency or "coupling". By using events a large program can be broken into smaller and simpler units. Modules can be added/removed/modified without affecting the other parts of the application
+Observable is a generic tool to send and receive events. It's a common pattern to isolate modules without forming a dependency or "coupling". By using events a large program can be broken into smaller and simpler units. Modules can be added, removed, or modified without affecting the other parts of the application.
 
-A common practice is to split the application into a single core and multiple extensions. The core sends events any time something remarkable happens: new item is being added, existing item being removed or something is loaded from the server.
+A common practice is to split the application into a single core and multiple extensions. The core sends events any time something remarkable happens: a new item is being added, an existing item is being removed, or something is loaded from the server.
 
 By using the observable the extensions can listen to these events and react to them. They extend the core so that the core is not aware of these modules. This is called "loose coupling".
 
 These extensions can be custom tags (UI components) or non-UI modules.
 
-Once core and the events are carefully designed the team members are enabled to develop the system on their own without disturbing others.
+Once the core and events are carefully designed the team members are enabled to develop the system on their own without disturbing others.
 
 [Observable API](/riotjs/api/#observable)
 
 
 ## Routing
 
-Riot router is a generic tool to take care of the URL and the back button. It's the smallest implementation you can find and it works on all browsers including IE8. It can do the following:
+Router is a generic tool to take care of the URL and the back button. It's the smallest implementation you can find and it works on all browsers including IE8. It can do the following:
 
-1. change the hash part of the URL,
-2. notify when the hash changes and
-3. study the current hash.
+1. Change the hash part of the URL
+2. Notify when the hash changes
+3. Study the current hash
 
-You can place routing logic everywhere; in custom tags or non-UI modules. Some application frameworks make router a central element that dispatches work to the other pieces of the application. Some take a milder approach where URL events are like keyboard events, not affecting the overall architecture.
+You can place routing logic everywhere; in custom tags or non-UI modules. Some application frameworks make the router a central element that dispatches work to the other pieces of the application. Some take a milder approach where URL events are like keyboard events, not affecting the overall architecture.
 
 Every browser application needs routing since there is always an URL in the location bar.
 
 [Router API](/riotjs/api/#router)
+
+
+## Modularity
+
+Custom tags make the view part of your application. In modular application these tags should not be aware of each other and they should be isolated. Ideally you can use the same tag across projects regardless of the outer HTML layout.
+
+If two tags know about each other they become depdendent and a "tight coupling" is introduced. These tags cannot be freely moved around without breaking the system.
+
+To reduce coupling, have the tags listen for events rather than call each other directly. What you need is a publish/subscribe system built with `riot.observable` or similar.
+
+This event emitting system can range from a simple API to a larger architectural choice like Facebook Flux.
+
+### Example Riot application design
+
+Here is a very bare bones Riot application structure for user login:
+
+```
+// Login API
+var auth = riot.observable()
+
+auth.login = function(params) {
+  $.get('/api', params, function(json) {
+    auth.trigger('login', json)
+  })
+}
+
+
+<!-- login view -->
+<login>
+  <form onsubmit="{ login }">
+    <input name="username" type="text" placeholder="username">
+    <input name="password" type="password" placeholder="password">
+  </form>
+
+  login() {
+    opts.login({
+      username: this.username.value,
+      password: this.password.value
+    })
+  }
+
+  // any tag on the system can listen to login event
+  opts.on('login', function() {
+    $(body).addClass('logged')
+  })
+</login>
+```
+
+And here we mount the application
+
+```
+<body>
+  <login></login>
+  <script>riot.mount('login', auth)</script>
+</body>
+```
+
+On the above setup the other tags on the system do not need to know about each other since they can simply listen to the "login" event and do what they please.
+
+Observable is a classic building block for a decoupled (modular) application.
